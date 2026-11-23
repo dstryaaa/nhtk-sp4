@@ -699,3 +699,25 @@ func TestUpdateStock_StockRequired(t *testing.T) {
 		t.Fatalf("want 'stock is required', got %q", errBody["error"])
 	}
 }
+
+func TestCreate_StockNegative(t *testing.T) {
+	truncate(t)
+	repo := NewRepo(testPool)
+	h := NewHandler(repo)
+
+	body := strings.NewReader(`{"sku":"NEG","name":"X","price":1,"stock":-1}`)
+	req := httptest.NewRequest("POST", "/api/products", body)
+	rec := httptest.NewRecorder()
+	h.Create(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", rec.Code)
+	}
+	var errBody map[string]string
+	if err := json.NewDecoder(rec.Body).Decode(&errBody); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if errBody["error"] != "stock must be >= 0" {
+		t.Fatalf("want 'stock must be >= 0', got %q", errBody["error"])
+	}
+}

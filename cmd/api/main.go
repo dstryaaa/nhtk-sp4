@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/dstryaaa/nhtk-sp4/internal/order"
 	"github.com/dstryaaa/nhtk-sp4/internal/product"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -35,9 +36,14 @@ func main() {
 	productRepo := product.NewRepo(pool)
 	productHandler := product.NewHandler(productRepo)
 
+	orderRepo := order.NewRepo(pool)
+	orderHandler := order.NewHandler(orderRepo)
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok")) })
 	productHandler.Register(mux)
+
+	orderHandler.Register(mux)
 	srv := &http.Server{Addr: ":8080", Handler: mux, ReadHeaderTimeout: 5 * time.Second}
 	log.Fatal(srv.ListenAndServe())
 }
