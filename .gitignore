@@ -1,0 +1,5 @@
+.env
+*.out
+coverage.html
+/api
+bin/
